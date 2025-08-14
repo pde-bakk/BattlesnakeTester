@@ -13,7 +13,7 @@
     "scripts": {
         "build": "tsc",
         "test": "mocha ./dist/test.js",
-        "hard_test": "mocha ./dist/hard_test.js",
+        "hard_test": "mocha ./dist/hard_test.js"
     },
     "devDependencies": {
         "@types/chai": "^5.2.2",
