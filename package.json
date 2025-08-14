@@ -1,17 +1,26 @@
 {
-    "name": "BattlesnakeTester",
+    "name": "battlesnake-tester",
     "version": "0.0.1",
     "description": "Can be used to test battlesnake server edge cases",
-    "preferGlobal": "true",
-    "main": "main.js",
-    "author": "Devin Corrigall",
+    "main": "dist/main.js",
+    "author": "Peer de Bakker",
     "dependencies": {
-        "chai-http": "3.0.0",
-        "chai": "4.1.2",
-        "mocha": "5.0.0"
+        "chai": "^5.2.1",
+        "chai-http": "^5.1.2",
+        "mocha": "5.0.0",
+        "sleep": "^6.3.0"
     },
     "scripts": {
-        "test": "mocha ./test.js",
-        "hard_test": "mocha ./hard_test.js"
+        "build": "tsc",
+        "test": "mocha ./dist/test.js",
+        "hard_test": "mocha ./dist/hard_test.js",
+    },
+    "devDependencies": {
+        "@types/chai": "^5.2.2",
+        "@types/mocha": "^10.0.10",
+        "@types/node": "^24.2.1",
+        "@types/sleep": "^6.3.0",
+        "ts-node": "^10.9.2",
+        "typescript": "^5.9.2"
     }
 }

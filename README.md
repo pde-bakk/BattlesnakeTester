@@ -16,6 +16,3 @@ For hard tests, replace `test` with `hard_test`. Eg. `npm --host=localhost --por
 If you have any questions, or just wish to chat about Battlesnake
  or programming in general, feel free to reach out! I like talking
 with people and sharing tips and tricks.
-
-You can reach me at [carl.lajeunesse@gmail.com](mailto:carl.lajeunesse@gmail.com), or catch me in
-[Battlesnake Slack][slack] (username: `@Nettogrof`).
