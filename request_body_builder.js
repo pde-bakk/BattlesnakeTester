@@ -133,11 +133,9 @@ function printBoard(body) {
 	// Find your snake id
 	var yourId = body.you.id;
 
-	// Add snakes
-
 	for (var i = 0; i < body.board.snakes.length; i++) {
 		var snake = body.board.snakes[i];
-		for(var j = 0; j < snake.length; j++) {
+		for (var j = 0; j < snake.length; j++) {
 			var coord = snake.body[j];
 			// Print your snake differently
 			if (j == 0) {
@@ -157,18 +155,14 @@ function printBoard(body) {
 	}
 
 	// Print how much health you have
-	console.log("\n\nYou have " + body["you"]["health"] + " health.");
-
-	// Print board
-	for (var i = 0; i < body.width; i++) {
-		for (var j = 0; j < body.height; j++) {
-			// Don't put a newline
-			process.stdout.write(board[j][i] + ' ');
-		}
-
-		// Just a newline
-		console.log('');
-	}
+	console.log("\n\nYou have " + body["you"]["health"] + " health.\nBoard:");
+    for (var i = 0; i < body.board.height; i++) {
+        var rowString = '';
+        for (var j = 0; j < body.board.width; j++) {
+            rowString += board[i][j] + ' ';
+        }
+        console.log(rowString);
+    }
 }
 
 module.exports = {
