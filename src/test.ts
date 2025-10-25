@@ -1,31 +1,15 @@
 #!/usr/bin/env node
-import chai from 'chai';
-import chaiHttp from 'chai-http';
-import { checkForGoodResponse, sendMoveRequest, getUrl } from './test_helper';
+import { chaiWithHttp, url, expectMove, expectNotMove, expectAnyMove, expectSuccess } from './test_setup';
+import { sendMoveRequest } from './test_helper';
 import * as requestBodyBuilder from './request_body_builder';
-
-chai.use(chaiHttp);
-const expect = chai.expect;
-const chaiWithHttp = chai as any;
-
-const url: string = getUrl();
-
-interface MoveResponse {
-    move: string;
-}
 
 it('should handle start request', function(done) {
     const requestBody = requestBodyBuilder.getEmptyRequestBody(20, 20);
 
-    const responseHandler = function (err: any, res: ChaiHttp.Response): void {
-        checkForGoodResponse(err, res);
-        done();
-    };
-
     chaiWithHttp.request(url)
         .post('/start')
         .send(requestBody)
-        .end(responseHandler);
+        .end(expectSuccess(done));
 });
 
 it('should return a move (any move)', function(done) {
@@ -35,14 +19,7 @@ it('should return a move (any move)', function(done) {
     requestBodyBuilder.addYou(requestBody, [{x: 11, y: 11}, {x: 11, y: 12}, {x: 11, y: 13}]);
     requestBodyBuilder.printBoard(requestBody);
 
-    const responseHandler = function (err: any, res: ChaiHttp.Response): void {
-        checkForGoodResponse(err, res);
-        const response: MoveResponse = JSON.parse(res.text);
-        expect(response).to.have.property('move');
-        done();
-    };
-
-    sendMoveRequest(url, requestBody, responseHandler);
+    sendMoveRequest(url, requestBody, expectAnyMove(done));
 });
 
 it('should handle small spaces (flood fill)', function(done) {
@@ -52,14 +29,7 @@ it('should handle small spaces (flood fill)', function(done) {
     requestBodyBuilder.addYou(requestBody, [{x: 11, y: 19}, {x: 11, y: 18}, {x: 11, y: 17}]);
     requestBodyBuilder.printBoard(requestBody);
 
-    const responseHandler = function (err: any, res: ChaiHttp.Response): void {
-        checkForGoodResponse(err, res);
-        const response: MoveResponse = JSON.parse(res.text);
-        expect(response).to.have.property('move').with.equal('right');
-        done();
-    };
-
-    sendMoveRequest(url, requestBody, responseHandler);
+    sendMoveRequest(url, requestBody, expectMove('right', done));
 });
 
 it('should handle small spaces V2 (flood fill)', function(done) {
@@ -70,14 +40,7 @@ it('should handle small spaces V2 (flood fill)', function(done) {
     requestBodyBuilder.addYou(requestBody, [{x: 8, y: 0}, {x: 8, y: 1}, {x: 8, y: 2}, {x: 8, y: 3}, {x: 8, y: 4}, {x: 8, y: 5}, {x: 8, y: 6}, {x: 8, y: 7}, {x: 8, y: 8}, {x: 8, y: 9}, {x: 7, y: 9}, {x: 6, y: 9}, {x: 5, y: 9}, {x: 4, y: 9}, {x: 3, y: 9}, {x: 2, y: 9}, {x: 1, y: 9}, {x: 0, y: 9}, {x: 0, y: 8}, {x: 1, y: 8}, {x: 2, y: 8}, {x: 3, y: 8}]);
     requestBodyBuilder.printBoard(requestBody);
 
-    const responseHandler = function (err: any, res: ChaiHttp.Response): void {
-        checkForGoodResponse(err, res);
-        const response: MoveResponse = JSON.parse(res.text);
-        expect(response).to.have.property('move').with.equal('left');
-        done();
-    };
-
-    sendMoveRequest(url, requestBody, responseHandler);
+    sendMoveRequest(url, requestBody, expectMove('left', done));
 });
 
 // Your snake has 1hp, food right beside it (test for slither dying in a weird way)
@@ -91,14 +54,7 @@ it('should eat food beside you at 1hp', function(done) {
     requestBodyBuilder.addYou(requestBody, [{x: 2, y: 3}, {x: 2, y: 4}, {x: 2, y: 5}, {x: 2, y: 6}, {x: 2, y: 7}, {x: 2, y: 8}, {x: 2, y: 9}, {x: 2, y: 10}, {x: 2, y: 11}, {x: 2, y: 12}, {x: 2, y: 13}, {x: 2, y: 14}, {x: 2, y: 15}, {x: 2, y: 16}, {x: 2, y: 17}, {x: 2, y: 18}, {x: 2, y: 19}, {x: 3, y: 19}, {x: 3, y: 18}, {x: 3, y: 17}, {x: 3, y: 16}, {x: 3, y: 15}, {x: 3, y: 14}, {x: 3, y: 13}, {x: 3, y: 12}, {x: 3, y: 11}, {x: 3, y: 10}, {x: 3, y: 9}, {x: 3, y: 8}, {x: 3, y: 7}, {x: 3, y: 6}, {x: 3, y: 5}, {x: 3, y: 4}, {x: 3, y: 3}, {x: 3, y: 2}, {x: 3, y: 1}, {x: 3, y: 0}, {x: 2, y: 0}, {x: 2, y: 1}], 1);
     requestBodyBuilder.printBoard(requestBody);
 
-    const responseHandler = function (err: any, res: ChaiHttp.Response): void {
-        checkForGoodResponse(err, res);
-        const response: MoveResponse = JSON.parse(res.text);
-        expect(response).to.have.property('move').with.equal('left');
-        done();
-    };
-
-    sendMoveRequest(url, requestBody, responseHandler);
+    sendMoveRequest(url, requestBody, expectMove('left', done));
 });
 
 // Your snake has 1hp, food right beside it, and an enemy snake (test for slither dying in a weird way)
@@ -112,14 +68,7 @@ it('should eat food beside you at 1hp with enemy snake around', function(done) {
     requestBodyBuilder.addYou(requestBody, [{x: 2, y: 3}, {x: 2, y: 4}, {x: 2, y: 5}, {x: 2, y: 6}, {x: 2, y: 7}, {x: 2, y: 8}, {x: 2, y: 9}, {x: 2, y: 10}, {x: 2, y: 11}, {x: 2, y: 12}, {x: 2, y: 13}, {x: 2, y: 14}, {x: 2, y: 15}, {x: 2, y: 16}, {x: 2, y: 17}, {x: 2, y: 18}, {x: 2, y: 19}, {x: 3, y: 19}, {x: 3, y: 18}, {x: 3, y: 17}, {x: 3, y: 16}, {x: 3, y: 15}, {x: 3, y: 14}, {x: 3, y: 13}, {x: 3, y: 12}, {x: 3, y: 11}, {x: 3, y: 10}, {x: 3, y: 9}, {x: 3, y: 8}, {x: 3, y: 7}, {x: 3, y: 6}, {x: 3, y: 5}, {x: 3, y: 4}, {x: 3, y: 3}, {x: 3, y: 2}, {x: 3, y: 1}, {x: 3, y: 0}, {x: 2, y: 0}, {x: 2, y: 1}], 1);
     requestBodyBuilder.printBoard(requestBody);
 
-    const responseHandler = function (err: any, res: ChaiHttp.Response): void {
-        checkForGoodResponse(err, res);
-        const response: MoveResponse = JSON.parse(res.text);
-        expect(response).to.have.property('move').with.equal('left');
-        done();
-    };
-
-    sendMoveRequest(url, requestBody, responseHandler);
+    sendMoveRequest(url, requestBody, expectMove('left', done));
 });
 
 // Test for chasing tail after eating food
@@ -130,14 +79,7 @@ it('should not move into a space behind a tail that is about to grow', function(
     requestBodyBuilder.addYou(requestBody, [{x: 11, y: 11}, {x: 11, y: 12}, {x: 12, y: 12}, {x: 12, y: 11}, {x: 12, y: 10}, {x: 12, y: 9}, {x: 11, y: 9}, {x: 11, y: 10}, {x: 11, y: 10}]);
     requestBodyBuilder.printBoard(requestBody);
 
-    const responseHandler = function (err: any, res: ChaiHttp.Response): void {
-        checkForGoodResponse(err, res);
-        const response: MoveResponse = JSON.parse(res.text);
-        expect(response).to.have.property('move').with.not.equal('down');
-        done();
-    };
-
-    sendMoveRequest(url, requestBody, responseHandler);
+    sendMoveRequest(url, requestBody, expectNotMove(done, 'down'));
 });
 
 it('should not kill itself when scared of another shorter snake', function(done) {
@@ -147,15 +89,7 @@ it('should not kill itself when scared of another shorter snake', function(done)
     requestBodyBuilder.addYou(requestBody, [{x: 13, y: 3}, {x: 12, y: 3}, {x: 12, y: 2}, {x: 13, y: 2}, {x: 14, y: 2}, {x: 15, y: 2}, {x: 16, y: 2}, {x: 17, y: 2}, {x: 17, y: 3}, {x: 18, y: 3}, {x: 19, y: 3}]);
     requestBodyBuilder.printBoard(requestBody);
 
-    const responseHandler = function (err: any, res: ChaiHttp.Response): void {
-        checkForGoodResponse(err, res);
-        const response: MoveResponse = JSON.parse(res.text);
-        expect(response).to.have.property('move').with.not.equal('down');
-        expect(response).to.have.property('move').with.not.equal('left');		
-        done();
-    };
-
-    sendMoveRequest(url, requestBody, responseHandler);
+    sendMoveRequest(url, requestBody, expectNotMove(done, 'down', 'left'));
 });
 
 it('should not kill itself when scared of another longer snake', function(done) {
@@ -165,15 +99,7 @@ it('should not kill itself when scared of another longer snake', function(done) 
     requestBodyBuilder.addYou(requestBody, [{x: 13, y: 3}, {x: 12, y: 3}, {x: 12, y: 2}, {x: 13, y: 2}, {x: 14, y: 2}, {x: 15, y: 2}, {x: 16, y: 2}, {x: 17, y: 2}, {x: 17, y: 3}, {x: 18, y: 3}, {x: 19, y: 3}]);
     requestBodyBuilder.printBoard(requestBody);
 
-    const responseHandler = function (err: any, res: ChaiHttp.Response): void {
-        checkForGoodResponse(err, res);
-        const response: MoveResponse = JSON.parse(res.text);
-        expect(response).to.have.property('move').with.not.equal('down');
-        expect(response).to.have.property('move').with.not.equal('left');		
-        done();
-    };
-
-    sendMoveRequest(url, requestBody, responseHandler);
+    sendMoveRequest(url, requestBody, expectNotMove(done, 'down', 'left'));
 });
 
 it('should avoid the head of another longer snake', function(done) {
@@ -183,14 +109,7 @@ it('should avoid the head of another longer snake', function(done) {
     requestBodyBuilder.addYou(requestBody, [{x: 13, y: 3}, {x: 13, y: 2}, {x: 14, y: 2}, {x: 15, y: 2}, {x: 16, y: 2}, {x: 17, y: 2}, {x: 17, y: 3}, {x: 18, y: 3}, {x: 19, y: 3}]);
     requestBodyBuilder.printBoard(requestBody);
 
-    const responseHandler = function (err: any, res: ChaiHttp.Response): void {
-        checkForGoodResponse(err, res);
-        const response: MoveResponse = JSON.parse(res.text);
-        expect(response).to.have.property('move').with.equal('left');
-        done();
-    };
-
-    sendMoveRequest(url, requestBody, responseHandler);
+    sendMoveRequest(url, requestBody, expectMove('left', done));
 });
 
 // Test one of Shiffany's deaths
@@ -202,14 +121,7 @@ it('should avoid dead end food', function(done) {
     requestBodyBuilder.addYou(requestBody, [{x: 10, y: 4}, {x: 11, y: 4}, {x: 11, y: 5}, {x: 11, y: 6}, {x: 12, y: 6}, {x: 12, y: 5}, {x: 12, y: 4}, {x: 12, y: 3}]);
     requestBodyBuilder.printBoard(requestBody);
 
-    const responseHandler = function (err: any, res: ChaiHttp.Response): void {
-        checkForGoodResponse(err, res);
-        const response: MoveResponse = JSON.parse(res.text);
-        expect(response).to.have.property('move').with.equal('down');
-        done();
-    };
-
-    sendMoveRequest(url, requestBody, responseHandler);
+    sendMoveRequest(url, requestBody, expectMove('down', done));
 });
 
 it('should avoid a corner when growing tail will get in the way (2x on tail)', function(done) {
@@ -219,14 +131,7 @@ it('should avoid a corner when growing tail will get in the way (2x on tail)', f
     requestBodyBuilder.addYou(requestBody, [{x: 19, y: 1}, {x: 18, y: 1}, {x: 18, y: 0}, {x: 18, y: 0}]);
     requestBodyBuilder.printBoard(requestBody);
 
-    const responseHandler = function (err: any, res: ChaiHttp.Response): void {
-        checkForGoodResponse(err, res);
-        const response: MoveResponse = JSON.parse(res.text);
-        expect(response).to.have.property('move').with.equal('up');
-        done();
-    };
-
-    sendMoveRequest(url, requestBody, responseHandler);
+    sendMoveRequest(url, requestBody, expectMove('up', done));
 });
 
 // Test another of Shiffany's deaths
@@ -238,14 +143,7 @@ it('should not take a dangerous move at the start', function(done) {
     requestBodyBuilder.addYou(requestBody, [{x: 7, y: 9}, {x: 7, y: 10}, {x: 7, y: 10}]);
     requestBodyBuilder.printBoard(requestBody);
 
-    const responseHandler = function (err: any, res: ChaiHttp.Response): void {
-        checkForGoodResponse(err, res);
-        const response: MoveResponse = JSON.parse(res.text);
-        expect(response).to.have.property('move').with.equal('left');
-        done();
-    };
-
-    sendMoveRequest(url, requestBody, responseHandler);
+    sendMoveRequest(url, requestBody, expectMove('left', done));
 });
 
 // Test one of Shiffany's deaths
@@ -258,14 +156,7 @@ it('should avoid the head of a longer snake', function(done) {
     requestBodyBuilder.addYou(requestBody, [{x: 7, y: 9}, {x: 7, y: 8}, {x: 7, y: 7}, {x: 7, y: 6}, {x: 7, y: 5}, {x: 7, y: 4}, {x: 7, y: 3}, {x: 6, y: 3}, {x: 6, y: 2}, {x: 7, y: 2}, {x: 8, y: 2}, {x: 8, y: 3}, {x: 8, y: 4}, {x: 8, y: 5}, {x: 8, y: 6}]);
     requestBodyBuilder.printBoard(requestBody);
 
-    const responseHandler = function (err: any, res: ChaiHttp.Response): void {
-        checkForGoodResponse(err, res);
-        const response: MoveResponse = JSON.parse(res.text);
-        expect(response).to.have.property('move').with.equal('left');
-        done();
-    };
-
-    sendMoveRequest(url, requestBody, responseHandler);
+    sendMoveRequest(url, requestBody, expectMove('left', done));
 });
 
 it('should eat very dangerous food if about to die and there is a chance of living', function(done) {
@@ -275,14 +166,7 @@ it('should eat very dangerous food if about to die and there is a chance of livi
     requestBodyBuilder.addYou(requestBody, [{x: 0, y: 18}, {x: 0, y: 17}, {x: 1, y: 17}, {x: 1, y: 16}, {x: 1, y: 15}, {x: 1, y: 14}], 1);
     requestBodyBuilder.printBoard(requestBody);
 
-    const responseHandler = function (err: any, res: ChaiHttp.Response): void {
-        checkForGoodResponse(err, res);
-        const response: MoveResponse = JSON.parse(res.text);
-        expect(response).to.have.property('move').with.equal('up');
-        done();
-    };
-
-    sendMoveRequest(url, requestBody, responseHandler);
+    sendMoveRequest(url, requestBody, expectMove('up', done));
 });
 
 // Just in case another snake dies during those turns!
@@ -293,14 +177,7 @@ it('should make a move to stay alive even if death in a couple turns is unavoida
     requestBodyBuilder.addYou(requestBody, [{x: 19, y: 17}, {x: 19, y: 16}, {x: 19, y: 15}, {x: 19, y: 14}, {x: 19, y: 13}]);
     requestBodyBuilder.printBoard(requestBody);
 
-    const responseHandler = function (err: any, res: ChaiHttp.Response): void {
-        checkForGoodResponse(err, res);
-        const response: MoveResponse = JSON.parse(res.text);
-        expect(response).to.have.property('move').with.equal('up');
-        done();
-    };
-
-    sendMoveRequest(url, requestBody, responseHandler);
+    sendMoveRequest(url, requestBody, expectMove('up', done));
 });
 
 it('should recognise the tail will make space for it to move', function(done) {
@@ -310,14 +187,7 @@ it('should recognise the tail will make space for it to move', function(done) {
     requestBodyBuilder.addYou(requestBody, [{x: 6, y: 6}, {x: 5, y: 6}, {x: 5, y: 7}, {x: 5, y: 8}, {x: 5, y: 9}, {x: 5, y: 10}, {x: 5, y: 11}, {x: 5, y: 12}, {x: 6, y: 12}, {x: 7, y: 12}, {x: 7, y: 11}, {x: 7, y: 10}, {x: 7, y: 9}, {x: 7, y: 8}, {x: 7, y: 7}, {x: 8, y: 7}, {x: 8, y: 6}, {x: 9, y: 6}, {x: 9, y: 5}, {x: 9, y: 4}, {x: 8, y: 4}, {x: 7, y: 4}, {x: 6, y: 4}, {x: 5, y: 4}, {x: 5, y: 5}, {x: 6, y: 5}]);
     requestBodyBuilder.printBoard(requestBody);
 
-    const responseHandler = function (err: any, res: ChaiHttp.Response): void {
-       checkForGoodResponse(err, res);
-       const response: MoveResponse = JSON.parse(res.text);
-       expect(response).to.have.property('move').with.not.equal('up');
-       done();
-   };
-
-   sendMoveRequest(url, requestBody, responseHandler);
+    sendMoveRequest(url, requestBody, expectNotMove(done, 'up'));
 });
 
 it('should not get food when tail growth will kill it', function(done) {
@@ -327,14 +197,7 @@ it('should not get food when tail growth will kill it', function(done) {
    requestBodyBuilder.addYou(requestBody, [{x: 10, y: 11}, {x: 11, y: 11}, {x: 11, y: 10}, {x: 12, y: 10}, {x: 13, y: 10}, {x: 14, y: 10}, {x: 14, y: 9}, {x: 14, y: 8}, {x: 13, y: 8}, {x: 12, y: 8}, {x: 11, y: 8}, {x: 11, y: 9}, {x: 10, y: 9}, {x: 9, y: 9}, {x: 8, y: 9}, {x: 8, y: 10}, {x: 9, y: 10}, {x: 9, y: 11}]);
    requestBodyBuilder.printBoard(requestBody);
 
-   const responseHandler = function (err: any, res: ChaiHttp.Response): void {
-       checkForGoodResponse(err, res);
-       const response: MoveResponse = JSON.parse(res.text);
-       expect(response).to.have.property('move').with.not.equal('down');
-       done();
-   };
-
-   sendMoveRequest(url, requestBody, responseHandler);
+   sendMoveRequest(url, requestBody, expectNotMove(done, 'down'));
 });
 
 it('should eat food that is not actually dangerous if low on health', function(done) {
@@ -344,26 +207,14 @@ it('should eat food that is not actually dangerous if low on health', function(d
    requestBodyBuilder.addYou(requestBody, [{x: 7, y: 3}, {x: 7, y: 4}, {x: 6, y: 4}, {x: 6, y: 5}, {x: 6, y: 6}, {x: 6, y: 7}, {x: 6, y: 8}, {x: 6, y: 9}, {x: 6, y: 10}, {x: 6, y: 11}, {x: 5, y: 11}, {x: 5, y: 10}, {x: 4, y: 10}, {x: 4, y: 9}, {x: 3, y: 9}, {x: 3, y: 8}, {x: 3, y: 7}, {x: 3, y: 6}, {x: 3, y: 5}, {x: 2, y: 5}, {x: 1, y: 5}, {x: 1, y: 4}, {x: 1, y: 3}, {x: 2, y: 3}, {x: 2, y: 4}, {x: 3, y: 4}, {x: 4, y: 4}, {x: 5, y: 4}, {x: 5, y: 3}, {x: 6, y: 3}], 5);
    requestBodyBuilder.printBoard(requestBody);
 
-   const responseHandler = function (err: any, res: ChaiHttp.Response): void {
-       checkForGoodResponse(err, res);
-       const response: MoveResponse = JSON.parse(res.text);
-       expect(response).to.have.property('move').with.equal('down');
-       done();
-   };
-
-   sendMoveRequest(url, requestBody, responseHandler);
+   sendMoveRequest(url, requestBody, expectMove('down', done));
 });
 
 it('should handle end request', function(done) {
    const requestBody = requestBodyBuilder.getEmptyRequestBody(11, 11);
 
-   const responseHandler = function (err: any, res: ChaiHttp.Response): void {
-       checkForGoodResponse(err, res);
-       done();
-   };
-
     chaiWithHttp.request(url)
        .post('/end')
        .send(requestBody)
-       .end(responseHandler);
+       .end(expectSuccess(done));
 });

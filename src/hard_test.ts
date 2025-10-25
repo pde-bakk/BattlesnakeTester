@@ -1,33 +1,15 @@
 #!/usr/bin/env node
-// import * as chai from 'chai';
-// import * as chaiHttp from 'chai-http';
-import chai from 'chai';
-import chaiHttp from 'chai-http';
-import { checkForGoodResponse, sendMoveRequest, getUrl } from './test_helper';
+import { chaiWithHttp, url, expectMove, expectSuccess } from './test_setup';
+import { sendMoveRequest } from './test_helper';
 import * as requestBodyBuilder from './request_body_builder';
-
-chai.use(chaiHttp);
-const expect = chai.expect;
-const chaiWithHttp = chai as any;
-
-const url: string = getUrl();
-
-interface MoveResponse {
-    move: string;
-}
 
 it('should handle start request', function(done) {
     const requestBody = requestBodyBuilder.getEmptyRequestBody(20, 20);
 
-    const responseHandler = function (err: any, res: ChaiHttp.Response): void {
-        checkForGoodResponse(err, res);
-        done();
-    };
-
     chaiWithHttp.request(url)
         .post('/start')
         .send(requestBody)
-        .end(responseHandler);
+        .end(expectSuccess(done));
 });
 
 // There is a path to get back out after eating the food. Some snakes decide there isn't, and don't eat the food.
@@ -41,14 +23,7 @@ it('should eat dangerous food to not die at 2hp', function(done) {
     requestBodyBuilder.addYou(requestBody, [{"x": 4, "y": 8}, {"x": 4, "y": 9}, {"x": 5, "y": 9}, {"x": 6, "y": 9}, {"x": 6, "y": 8}, {"x": 7, "y": 8}, {"x": 7, "y": 7}, {"x": 7, "y": 6}, {"x": 7, "y": 5}, {"x": 7, "y": 4}, {"x": 7, "y": 3}, {"x": 7, "y": 2}, {"x": 6, "y": 2}, {"x": 6, "y": 3}, {"x": 5, "y": 3}, {"x": 4, "y": 3}, {"x": 4, "y": 4}, {"x": 5, "y": 4}, {"x": 5, "y": 5}, {"x": 4, "y": 5}, {"x": 4, "y": 6}, {"x": 4, "y": 7}, {"x": 3, "y": 7}], 2);
     requestBodyBuilder.printBoard(requestBody);
 
-    const responseHandler = function (err: any, res: ChaiHttp.Response): void {
-        checkForGoodResponse(err, res);
-        const response: MoveResponse = JSON.parse(res.text);
-        expect(response).to.have.property('move').with.equal('right');
-        done();
-    };
-
-    sendMoveRequest(url, requestBody, responseHandler);
+    sendMoveRequest(url, requestBody, expectMove('right', done));
 });
 
 // This is questionable, since there IS a chance of getting the food and living, but I'd argue that most likely if you grab this food you'll die.
@@ -60,26 +35,14 @@ it('should avoid very dangerous food if at full health', function(done) {
     requestBodyBuilder.addYou(requestBody, [{"x": 0, "y": 18}, {"x": 0, "y": 17}, {"x": 1, "y": 17}, {"x": 1, "y": 16}, {"x": 1, "y": 15}, {"x": 1, "y": 14}]);
     requestBodyBuilder.printBoard(requestBody);
 
-    const responseHandler = function (err: any, res: ChaiHttp.Response): void {
-        checkForGoodResponse(err, res);
-        const response: MoveResponse = JSON.parse(res.text);
-        expect(response).to.have.property('move').with.equal('right');
-        done();
-    };
-
-    sendMoveRequest(url, requestBody, responseHandler);
+    sendMoveRequest(url, requestBody, expectMove('right', done));
 });
 
 it('should handle end request', function(done) {
     const requestBody = requestBodyBuilder.getEmptyRequestBody(20, 20);
 
-    const responseHandler = function (err: any, res: ChaiHttp.Response): void {
-        checkForGoodResponse(err, res);
-        done();
-    };
-
     chaiWithHttp.request(url)
         .post('/end')
         .send(requestBody)
-        .end(responseHandler);
+        .end(expectSuccess(done));
 });
