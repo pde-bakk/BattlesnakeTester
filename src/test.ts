@@ -1,12 +1,11 @@
-#!/usr/bin/env node
-import { chaiWithHttp, url, expectMove, expectNotMove, expectAnyMove, expectSuccess } from './test_setup';
+import {httpRequest, url, expectMove, expectSuccess, expectAnyMove, expectNotMove} from './test_setup';
 import { sendMoveRequest } from './test_helper';
 import * as requestBodyBuilder from './request_body_builder';
 
 it('should handle start request', function(done) {
     const requestBody = requestBodyBuilder.getEmptyRequestBody(20, 20);
 
-    chaiWithHttp.request(url)
+    httpRequest.execute(url)
         .post('/start')
         .send(requestBody)
         .end(expectSuccess(done));
@@ -213,7 +212,7 @@ it('should eat food that is not actually dangerous if low on health', function(d
 it('should handle end request', function(done) {
    const requestBody = requestBodyBuilder.getEmptyRequestBody(11, 11);
 
-    chaiWithHttp.request(url)
+    httpRequest.execute(url)
        .post('/end')
        .send(requestBody)
        .end(expectSuccess(done));

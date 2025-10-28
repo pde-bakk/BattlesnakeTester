@@ -1,12 +1,11 @@
-#!/usr/bin/env node
-import { chaiWithHttp, url, expectMove, expectSuccess } from './test_setup';
+import {url, expectMove, expectSuccess, httpRequest} from './test_setup';
 import { sendMoveRequest } from './test_helper';
 import * as requestBodyBuilder from './request_body_builder';
 
 it('should handle start request', function(done) {
     const requestBody = requestBodyBuilder.getEmptyRequestBody(20, 20);
 
-    chaiWithHttp.request(url)
+    httpRequest.execute(url)
         .post('/start')
         .send(requestBody)
         .end(expectSuccess(done));
@@ -27,7 +26,7 @@ it('should eat dangerous food to not die at 2hp', function(done) {
 });
 
 // This is questionable, since there IS a chance of getting the food and living, but I'd argue that most likely if you grab this food you'll die.
-// Also if you have higher health and neither of you grab the food, you should outlive the other snake.
+// Also, if you have higher health and neither of you grab the food, you should outlive the other snake.
 it('should avoid very dangerous food if at full health', function(done) {
     const requestBody = requestBodyBuilder.getEmptyRequestBody(20, 20);
     requestBodyBuilder.addFood(requestBody, 0, 19);
@@ -41,7 +40,7 @@ it('should avoid very dangerous food if at full health', function(done) {
 it('should handle end request', function(done) {
     const requestBody = requestBodyBuilder.getEmptyRequestBody(20, 20);
 
-    chaiWithHttp.request(url)
+    httpRequest.execute(url)
         .post('/end')
         .send(requestBody)
         .end(expectSuccess(done));

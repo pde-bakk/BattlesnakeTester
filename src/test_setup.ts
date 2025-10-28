@@ -1,20 +1,16 @@
 import chai from 'chai';
-import * as chaiHttp from 'chai-http';
+import chaiHttp, { request } from 'chai-http'; // ✅ Import both
 import { checkForGoodResponse, getUrl } from './test_helper';
 
 chai.use(chaiHttp);
+
 console.log('Has chai.request:', typeof (chai as any).request);
 
 export const expect = chai.expect;
-
-export const chaiWithHttp = chai;
-
-// // Extend Chai with request method for proper typing
-// export const chaiWithHttp = chai as typeof chai & {
-//     request: (url: string) => any;
-// };
-
 export const url: string = getUrl();
+
+// ✅ Use `request` directly (from chai-http), not `chai.request`
+export const httpRequest = request;
 
 export interface MoveResponse {
     move: string;

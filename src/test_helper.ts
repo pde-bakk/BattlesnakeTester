@@ -1,26 +1,19 @@
 import chai from 'chai';
-import chaiHttp from 'chai-http';
+
 import s from 'sleep';
-
-const expect = chai.expect;
-chai.use(chaiHttp);
-
-// Extend Chai with request method for proper typing
-const chaiWithHttp = chai as typeof chai & {
-    request: (url: string) => any;
-};
+import {httpRequest} from "./test_setup";
 
 interface ResponseHandler {
     (err: any, res: ChaiHttp.Response): void;
 }
 
 export function checkForGoodResponse(err: any, res: ChaiHttp.Response): void {
-    expect(err).to.be.null;
-    expect(res).to.have.status(200);
+    chai.expect(err).to.be.null;
+    chai.expect(res).to.have.status(200);
 }
 
 export function sendMoveRequest(url: string, requestBody: any, responseHandler: ResponseHandler): void {
-    chaiWithHttp.request(url)
+    httpRequest.execute(url)
         .post('/move')
         .send(requestBody)
         .end(function(err: any, res: ChaiHttp.Response): void {
@@ -28,7 +21,7 @@ export function sendMoveRequest(url: string, requestBody: any, responseHandler: 
             responseHandler(err, res);
         });
     s.sleep(1);
-    chaiWithHttp.request(url)
+    httpRequest.execute(url)
         .post('/move')
         .send(requestBody)
         .end(function(err: any, res: ChaiHttp.Response): void {
