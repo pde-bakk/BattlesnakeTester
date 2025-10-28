@@ -15,7 +15,7 @@ updates:
       - "dependencies"
       - "npm"
     reviewers:
-      - "Peer-de-Bakker"
+      - "pde-bakk"
     assignees:
-      - "Peer-de-Bakker"
+      - "pde-bakk"
     versioning-strategy: "increase"
