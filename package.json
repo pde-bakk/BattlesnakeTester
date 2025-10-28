@@ -5,7 +5,7 @@
     "main": "dist/main.js",
     "author": "Peer de Bakker",
     "dependencies": {
-        "chai": "^5.3.3",
+        "chai": "^6.2.0",
         "chai-http": "^5.1.2",
         "mocha": "11.7.4",
         "sleep": "^6.3.0"
