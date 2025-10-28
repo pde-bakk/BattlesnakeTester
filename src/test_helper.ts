@@ -20,14 +20,6 @@ export function sendMoveRequest(url: string, requestBody: any, responseHandler: 
             console.log(res.text);
             responseHandler(err, res);
         });
-    s.sleep(1);
-    httpRequest.execute(url)
-        .post('/move')
-        .send(requestBody)
-        .end(function(err: any, res: ChaiHttp.Response): void {
-            console.log(res.text);
-            responseHandler(err, res);
-        });
 }
 
 export function getUrl(): string {
